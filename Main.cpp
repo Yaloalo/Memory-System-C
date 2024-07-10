@@ -27,27 +27,32 @@ typedef struct Folder
 };
 
 Folder* initilize_file_system();
+
 void handle_command(Folder* folder);
 
-void create_file(char arg1[256], char arg2[1024]);
+void create_file(char arg1[256], char arg2[1024], Folder* folder);
 
-void create_directory(char arg1[256]);
+void create_directory(char arg1[256], Folder* folder);
 
-void read_file(char arg1[256]);
+void read_file(char arg1[256], Folder* folder);
 
-void write_file(char arg1[256], char arg2[1024]);
+void write_file(char arg1[256], char arg2[1024], Folder* folder);
 
-void delete_file(char arg1[256]);
+void delete_file(char arg1[256], Folder* folder);
 
-void delete_directory(char arg1[256]);
+void delete_directory(char arg1[256], Folder* folder);
 
 void list_directory_contents();
 
-void change_directory(char arg1[256]);
+void change_directory(char arg1[256], Folder* folder);
 
-void save_file_system(char arg1[256]);
+void save_file_system(char arg1[256], Folder* folder);
 
-void load_file_system(char arg1[256]);
+void load_file_system(char arg1[256], Folder* folder);
+
+Folder* find_folder(const char *path, Folder* root);
+
+Folder* find_file(const char *path, Folder* root);
 
 int main()
 {
@@ -65,7 +70,7 @@ Folder* initilize_file_system() {
         fprintf(stderr, "Malloc failed\n");
         exit(1);
     }
-    strcpy(rootfolder->name, "/");
+    strcpy(rootfolder->name, "root");
     rootfolder->Parent = NULL;
     rootfolder->number_of_children = 0;
     rootfolder->number_of_files = 0;\
@@ -97,27 +102,27 @@ void handle_command(Folder* folder)
         command[strcspn(command, "\n")] = 0;
 
         if (sscanf(command, "create file %s %s", arg1, arg2) == 2) {
-            create_file(arg1, arg2);
+            create_file(arg1, arg2, folder);
         } else if (sscanf(command, "create dir %s", arg1) == 1) {
-            create_directory(arg1);
+            create_directory(arg1, folder);
         } else if (sscanf(command, "read %s", arg1) == 1) {
-            read_file(arg1);
+            read_file(arg1, folder);
         } else if (sscanf(command, "write %s %s", arg1, arg2) == 2) {
-            write_file(arg1, arg2);
+            write_file(arg1, arg2, folder);
         } else if (sscanf(command, "delete file %s", arg1) == 1) {
-            delete_file(arg1);
+            delete_file(arg1, folder);
         } else if (sscanf(command, "delete dir %s", arg1) == 1) {
-            delete_directory(arg1);
+            delete_directory(arg1, folder);
         } else if (strcmp(command, "ls") == 0) {
             list_directory_contents();
         } else if (sscanf(command, "cd %s", arg1) == 1) {
-            change_directory(arg1);
+            change_directory(arg1, folder);
         } else if (strcmp(command, "exit") == 0) {
             break;
         } else if (sscanf(command, "save %s", arg1) == 1) {
-            save_file_system(arg1);
+            save_file_system(arg1, folder);
         } else if (sscanf(command, "load %s", arg1) == 1) {
-            load_file_system(arg1);
+            load_file_system(arg1, folder);
         } else {
             printf("Unknown command.\n");
         }
@@ -126,15 +131,15 @@ void handle_command(Folder* folder)
 
 }
 
-void load_file_system(char arg1[256]) {
+void load_file_system(char arg1[256], Folder* root) {
 
 }
 
-void save_file_system(char arg1[256]) {
+void save_file_system(char arg1[256], Folder* root) {
 
 }
 
-void change_directory(char arg1[256]) {
+void change_directory(char arg1[256], Folder* root) {
 
 }
 
@@ -142,26 +147,72 @@ void list_directory_contents() {
 
 }
 
-void delete_directory(char arg1[256]) {
+void delete_directory(char arg1[256], Folder* root) {
 
 }
 
-void delete_file(char arg1[256]) {
+void delete_file(char arg1[256], Folder* root) {
 
 }
 
-void write_file(char arg1[256], char arg2[1024]) {
+void write_file(char arg1[256], char arg2[1024], Folder* root) {
 
 }
 
-void read_file(char arg1[256]) {
+void read_file(char arg1[256], Folder* root) {
 
 }
 
-void create_directory(char arg1[256]) {
+void create_directory(char arg1[256], Folder* root) {
 
 }
 
-void create_file(char arg1[256], char arg2[1024]) {
+Folder* find_folder(const char *path, Folder* root)
+{
+    if (path[0] != '/') {
+        printf("Path must be absolute.\n");
+        return NULL;
+    }
+
+    if (strcmp(path, "/root") == 0)
+    {
+        return root;
+    }
+
+    Folder* dir = root;
+
+    char temp_path[1000];
+    strcpy(temp_path, path);
+
+    char* token = strtok(temp_path, "/");
+    printf(token);
+    while (token != NULL) {
+        int found = 0;
+        // Search for the token in the current directory's subdirectories
+        for (int i = 0; i < dir->number_of_children; i++) {
+            if (strcmp(dir->children[i]->name, token) == 0) {
+                // Move to the subdirectory if found
+                dir = dir->children[i];
+                found = 1;
+                break;
+            }
+        }
+        if (!found) {
+            return NULL;
+        }
+
+        // Get the next token
+        token = strtok(NULL, "/");
+    }
+
+    return dir;
+}
+
+Folder* find_file(const char *path, Folder* root)
+{
+
+}
+
+void create_file(char arg1[256], char arg2[1024], Folder* root) {
 
 }
