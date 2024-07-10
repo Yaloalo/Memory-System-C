@@ -29,6 +29,26 @@ typedef struct Folder
 Folder* initilize_file_system();
 void handle_command(Folder* folder);
 
+void create_file(char arg1[256], char arg2[1024]);
+
+void create_directory(char arg1[256]);
+
+void read_file(char arg1[256]);
+
+void write_file(char arg1[256], char arg2[1024]);
+
+void delete_file(char arg1[256]);
+
+void delete_directory(char arg1[256]);
+
+void list_directory_contents();
+
+void change_directory(char arg1[256]);
+
+void save_file_system(char arg1[256]);
+
+void load_file_system(char arg1[256]);
+
 int main()
 {
     Folder* root = initilize_file_system();
@@ -75,6 +95,73 @@ void handle_command(Folder* folder)
         printf(">");
         fgets(command, sizeof(command), stdin);
         command[strcspn(command, "\n")] = 0;
+
+        if (sscanf(command, "create file %s %s", arg1, arg2) == 2) {
+            create_file(arg1, arg2);
+        } else if (sscanf(command, "create dir %s", arg1) == 1) {
+            create_directory(arg1);
+        } else if (sscanf(command, "read %s", arg1) == 1) {
+            read_file(arg1);
+        } else if (sscanf(command, "write %s %s", arg1, arg2) == 2) {
+            write_file(arg1, arg2);
+        } else if (sscanf(command, "delete file %s", arg1) == 1) {
+            delete_file(arg1);
+        } else if (sscanf(command, "delete dir %s", arg1) == 1) {
+            delete_directory(arg1);
+        } else if (strcmp(command, "ls") == 0) {
+            list_directory_contents();
+        } else if (sscanf(command, "cd %s", arg1) == 1) {
+            change_directory(arg1);
+        } else if (strcmp(command, "exit") == 0) {
+            break;
+        } else if (sscanf(command, "save %s", arg1) == 1) {
+            save_file_system(arg1);
+        } else if (sscanf(command, "load %s", arg1) == 1) {
+            load_file_system(arg1);
+        } else {
+            printf("Unknown command.\n");
+        }
+
     }
+
+}
+
+void load_file_system(char arg1[256]) {
+
+}
+
+void save_file_system(char arg1[256]) {
+
+}
+
+void change_directory(char arg1[256]) {
+
+}
+
+void list_directory_contents() {
+
+}
+
+void delete_directory(char arg1[256]) {
+
+}
+
+void delete_file(char arg1[256]) {
+
+}
+
+void write_file(char arg1[256], char arg2[1024]) {
+
+}
+
+void read_file(char arg1[256]) {
+
+}
+
+void create_directory(char arg1[256]) {
+
+}
+
+void create_file(char arg1[256], char arg2[1024]) {
 
 }

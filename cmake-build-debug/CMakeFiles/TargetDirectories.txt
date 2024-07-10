@@ -1,0 +1,3 @@
+C:/Users/Main/CLionProjects/Memory-System-C/cmake-build-debug/CMakeFiles/Memory_System_C.dir
+C:/Users/Main/CLionProjects/Memory-System-C/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/Main/CLionProjects/Memory-System-C/cmake-build-debug/CMakeFiles/rebuild_cache.dir
