@@ -28,11 +28,11 @@ typedef struct Folder
 
 Folder* initilize_file_system();
 
-void handle_command(Folder* folder);
+void handle_command(Folder* root);
 
 void create_file(char arg1[256], char arg2[1024], Folder* folder);
 
-void create_directory(char arg1[256], Folder* folder);
+void create_directory(char arg1[256], Folder* folder, char path[2000]);
 
 void read_file(char arg1[256], Folder* folder);
 
@@ -53,6 +53,8 @@ void load_file_system(char arg1[256], Folder* folder);
 Folder* find_folder(const char *path, Folder* root);
 
 Folder* find_file(const char *path, Folder* root);
+
+void all_directories(Folder *pFolder);
 
 int main()
 {
@@ -89,11 +91,12 @@ Folder* initilize_file_system() {
     return rootfolder;
 }
 
-void handle_command(Folder* folder)
+void handle_command(Folder* root)
 {
     char command[256];
     char arg1[256];
     char arg2[1024];
+    char path[2000];
 
     while (1)
     {
@@ -102,33 +105,66 @@ void handle_command(Folder* folder)
         command[strcspn(command, "\n")] = 0;
 
         if (sscanf(command, "create file %s %s", arg1, arg2) == 2) {
-            create_file(arg1, arg2, folder);
-        } else if (sscanf(command, "create dir %s", arg1) == 1) {
-            create_directory(arg1, folder);
+            // create_file function should be defined elsewhere
+            create_file(arg1, arg2, root);
+        } else if (sscanf(command, "create dir %s %s", arg1, arg2) == 2) {
+            // create_dir function should be defined elsewhere
+            create_directory(arg1, root, arg2);
         } else if (sscanf(command, "read %s", arg1) == 1) {
-            read_file(arg1, folder);
+            read_file(arg1, root);
         } else if (sscanf(command, "write %s %s", arg1, arg2) == 2) {
-            write_file(arg1, arg2, folder);
+            write_file(arg1, arg2, root);
         } else if (sscanf(command, "delete file %s", arg1) == 1) {
-            delete_file(arg1, folder);
+            delete_file(arg1, root);
         } else if (sscanf(command, "delete dir %s", arg1) == 1) {
-            delete_directory(arg1, folder);
+            delete_directory(arg1, root);
         } else if (strcmp(command, "ls") == 0) {
             list_directory_contents();
-        } else if (sscanf(command, "cd %s", arg1) == 1) {
-            change_directory(arg1, folder);
+        } else if(strcmp(command, "all")==0){
+            all_directories(root);
+        }else if (sscanf(command, "cd %s", arg1) == 1) {
+            change_directory(arg1, root);
         } else if (strcmp(command, "exit") == 0) {
             break;
         } else if (sscanf(command, "save %s", arg1) == 1) {
-            save_file_system(arg1, folder);
+            save_file_system(arg1, root);
         } else if (sscanf(command, "load %s", arg1) == 1) {
-            load_file_system(arg1, folder);
+            load_file_system(arg1, root);
         } else {
             printf("Unknown command.\n");
         }
 
     }
 
+}
+
+void all_directories(Folder *root) {
+    if (root == NULL) {
+        return;
+    }
+
+    printf("Contents of folder: %s\n", root->name);
+
+    // List all files in the current folder
+    for (int i = 0; i < MAX_FILES; i++) {
+        if (root->files[i].name[0] != '\0') {
+            printf("  File: %s\n", root->files[i].name);
+        }
+    }
+
+    // List all child folders and then recursively call for each child folder
+    for (int i = 0; i < MAX_CHILD_FOLDERS; i++) {
+        if (root->children[i] != NULL) {
+            printf("  Folder: %s\n", root->children[i]->name);
+        }
+    }
+
+    // Recursively list contents of each child folder
+    for (int i = 0; i < MAX_CHILD_FOLDERS; i++) {
+        if (root->children[i] != NULL) {
+            all_directories(root->children[i]);
+        }
+    }
 }
 
 void load_file_system(char arg1[256], Folder* root) {
@@ -163,10 +199,49 @@ void read_file(char arg1[256], Folder* root) {
 
 }
 
-void create_directory(char arg1[256], Folder* root) {
+void create_directory(char arg1[256], Folder* root, char path[2000]) {
+    Folder* dir = find_folder(path, root);
+    if (dir == NULL) {
+        return;
+    }
 
+    for (int i = 0; i < MAX_CHILD_FOLDERS; i++) {
+        if (dir->children[i] == NULL) {
+            Folder* newfolder = (Folder *)malloc(sizeof(Folder));
+            if (newfolder == NULL) {
+                printf("Memory allocation failed\n");
+                return;
+            }
+
+            //put / in front of name
+
+
+            strcpy(newfolder->name, arg1);
+            newfolder->number_of_children = 0;
+            newfolder->number_of_files = 0;
+            newfolder->Parent = dir;
+            printf("Name of Parent: %s\n", newfolder->Parent->name);
+
+            for (int j = 0; j < MAX_FILES; j++) {
+                newfolder->files[j].name[0] = '\0';
+                newfolder->files[j].content[0] = '\0';
+                newfolder->files[j].creation_date = 0;
+                newfolder->files[j].size = 0;
+            }
+            for (int j = 0; j < MAX_CHILD_FOLDERS; j++) {
+                newfolder->children[j] = NULL;
+            }
+
+            dir->children[i] = newfolder;
+            dir->number_of_children++;
+            printf("Name of child: %s\n", dir->children[i]->name);
+            return;
+        }
+    }
+    printf("No available slot for a new directory\n");
 }
 
+//return pointer to directory
 Folder* find_folder(const char *path, Folder* root)
 {
     if (path[0] != '/') {
@@ -185,9 +260,15 @@ Folder* find_folder(const char *path, Folder* root)
     strcpy(temp_path, path);
 
     char* token = strtok(temp_path, "/");
-    printf(token);
     while (token != NULL) {
         int found = 0;
+
+        //check wehter fist token is root otherwise there are problems with the Children function.
+        if (strcmp(token, "root") == 0)
+        {
+            token = strtok(NULL, "/");
+            continue;
+        }
         // Search for the token in the current directory's subdirectories
         for (int i = 0; i < dir->number_of_children; i++) {
             if (strcmp(dir->children[i]->name, token) == 0) {
@@ -198,6 +279,7 @@ Folder* find_folder(const char *path, Folder* root)
             }
         }
         if (!found) {
+            printf("Path was invalid\n");
             return NULL;
         }
 
