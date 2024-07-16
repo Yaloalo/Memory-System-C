@@ -7,7 +7,8 @@
 #define MAX_FILES 100
 #define MAX_CONTENT_LENGTH 1024
 #define MAX_CHILD_FOLDERS 100
-
+//TODO When Linux is here save file content in txt file also add a folder system and a load and save function.
+// TODO so that the system can be used when booting to load the file system up. Inoed would also be nice.
 struct Folder;
 
 typedef struct File
@@ -18,7 +19,7 @@ typedef struct File
     time_t creation_date;
     struct Folder* parent_folder;
 } File;
-//TODO restructure verything realloc is needed
+
 typedef struct Folder
 {
     char name[MAX_NAME_LENGTH];
@@ -29,39 +30,22 @@ typedef struct Folder
     File files[MAX_FILES];
 };
 
-
-
 Folder* initilize_file_system();
-
 void handle_command(Folder* root);
-
 void get_input(char* buffer, size_t buffer_size);
-
 void create_file(char arg1[256], char arg2[1024], Folder* folder, char path[1000]);
-
 void create_directory(char arg1[256], Folder* folder, char path[2000]);
-
 void read_file(char arg1[256], Folder* folder);
-
 void write_file(char path[256], Folder* root);
-
 void delete_file(char arg1[256], Folder* folder);
-
 void delete_directory(char arg1[256], Folder* folder);
-
 void list_directory_contents(Folder* current_folder);
-
 Folder* change_directory(char arg1[256], Folder* folder);
-
-void save_file_system(char arg1[256], Folder* folder);
-
-void load_file_system(char arg1[256], Folder* folder);
-
 Folder* find_folder(const char *path, Folder* root);
-
 File* find_file(const char *path, Folder* root);
-
 void all_directories(Folder *pFolder);
+void save_file_to_disk(File* file);
+void delete_file_from_disk(char* filename);
 
 int main()
 {
@@ -82,18 +66,17 @@ Folder* initilize_file_system() {
     strcpy(rootfolder->name, "root");
     rootfolder->Parent = NULL;
     rootfolder->number_of_children = 0;
-    rootfolder->number_of_files = 0;\
-    for (int i; i <  MAX_FILES; i++)
+    rootfolder->number_of_files = 0;
+    for (int i = 0; i < MAX_FILES; i++)
     {
         rootfolder->files[i].name[0] = '\0';
         rootfolder->files[i].content[0] = '\0';
         rootfolder->files[i].creation_date =  0;
         rootfolder->files[i].size = 0;
     }
-    for (int i; i <  MAX_CHILD_FOLDERS; i++)
+    for (int i = 0; i < MAX_CHILD_FOLDERS; i++)
     {
         rootfolder->children[i] = NULL;
-
     }
     return rootfolder;
 }
@@ -135,9 +118,9 @@ void handle_command(Folder* root)
         } else if (strcmp(command, "exit") == 0) {
             break;
         } else if (sscanf(command, "save %255s", name) == 1) {
-            save_file_system(name, root);
+            // Placeholder for save_file_system(name, root);
         } else if (sscanf(command, "load %255s", name) == 1) {
-            load_file_system(name, root);
+            // Placeholder for load_file_system(name, root);
         } else {
             printf("Unknown command.\n");
         }
@@ -146,11 +129,8 @@ void handle_command(Folder* root)
 
 void all_directories(Folder *root) {
     if (root == NULL) {
-
         return;
     }
-
-    printf("Hi");
 
     printf("Contents of folder: %s\n", root->name);
 
@@ -175,18 +155,14 @@ void all_directories(Folder *root) {
     }
 }
 
-void load_file_system(char arg1[256], Folder* root) {
-
-}
-
-void save_file_system(char arg1[256], Folder* root) {
-
-}
-
 Folder* change_directory(char path[256], Folder* root)
 {
     Folder* dir = find_folder(path, root);
-    printf(dir->name);
+    if (dir != NULL) {
+        printf("Current directory: %s\n", dir->name);
+    } else {
+        printf("Directory not found.\n");
+    }
     return dir;
 }
 
@@ -197,7 +173,7 @@ void list_directory_contents(Folder* current_folder) {
         }
     }
 
-    // List all child folders and then recursively call for each child folder
+    // List all child folders
     for (int i = 0; i < MAX_CHILD_FOLDERS; i++) {
         if (current_folder->children[i] != NULL) {
             printf("  Folder: %s\n", current_folder->children[i]->name);
@@ -221,25 +197,82 @@ void get_input(char* buffer, size_t buffer_size) {
 }
 
 void delete_directory(char path[256], Folder* root) {
+    Folder* folder = find_folder(path, root);
+    if (folder == NULL) {
+        printf("Directory not found.\n");
+        return;
+    }
 
+    Folder* parent_folder = folder->Parent;
+    if (parent_folder == NULL) {
+        printf("Cannot delete root directory.\n");
+        return;
+    }
+
+    // Reassign children to parent folder
+    for (int i = 0; i < MAX_CHILD_FOLDERS; i++) {
+        if (folder->children[i] != NULL) {
+            parent_folder->children[parent_folder->number_of_children++] = folder->children[i];
+            folder->children[i]->Parent = parent_folder;
+        }
+    }
+
+    // Reassign files to parent folder
+    for (int i = 0; i < MAX_FILES; i++) {
+        if (folder->files[i].name[0] != '\0') {
+            parent_folder->files[parent_folder->number_of_files++] = folder->files[i];
+            folder->files[i].parent_folder = parent_folder;
+        }
+    }
+
+    // Remove the folder from parent's children list
+    for (int i = 0; i < MAX_CHILD_FOLDERS; i++) {
+        if (parent_folder->children[i] == folder) {
+            parent_folder->children[i] = NULL;
+            parent_folder->number_of_children--;
+            break;
+        }
+    }
+
+    free(folder);
 }
 
 void delete_file(char path[256], Folder* root) {
     File* file = find_file(path, root);
+    if (file == NULL) {
+        printf("File not found.\n");
+        return;
+    }
 
+    delete_file_from_disk(file->name);
 
+    file->name[0] = '\0';
+    file->content[0] = '\0';
+    file->creation_date =  0;
+    file->size = 0;
 }
 
 void write_file(char path[256], Folder* root) {
     File* file = find_file(path, root);
+    if (file == NULL) {
+        printf("File not found.\n");
+        return;
+    }
+
     printf("File name: %s\n File content: %s\n", file->name, file->content);
     char input[1000];
     get_input(input, sizeof(input));
     strcpy(file->content, input);
+
+    save_file_to_disk(file);
 }
 
 void read_file(char path[256], Folder* root) {
     File* file = find_file(path, root);
+    if (file == NULL) {
+        printf("File not found.\n");
+        return;
+    }
     printf("File name: %s\n File content: %s\n", file->name, file->content);
 }
 
@@ -248,7 +281,7 @@ void create_directory(char arg1[256], Folder* root, char path[2000]) {
     if (dir == NULL) {
         return;
     }
-    //TODO Check for name duplication also in Files
+
     for (int i = 0; i < MAX_CHILD_FOLDERS; i++) {
         if (dir->children[i] == NULL) {
             Folder* newfolder = (Folder *)malloc(sizeof(Folder));
@@ -256,9 +289,6 @@ void create_directory(char arg1[256], Folder* root, char path[2000]) {
                 printf("Memory allocation failed\n");
                 return;
             }
-
-            //put / in front of name
-
 
             strcpy(newfolder->name, arg1);
             newfolder->number_of_children = 0;
@@ -283,7 +313,6 @@ void create_directory(char arg1[256], Folder* root, char path[2000]) {
     printf("No available slot for a new directory\n");
 }
 
-//return pointer to directory
 Folder* find_folder(const char *path, Folder* root)
 {
     if (path[0] != '/') {
@@ -297,7 +326,6 @@ Folder* find_folder(const char *path, Folder* root)
     }
 
     Folder* dir = root;
-
     char temp_path[1000];
     strcpy(temp_path, path);
 
@@ -305,27 +333,25 @@ Folder* find_folder(const char *path, Folder* root)
     while (token != NULL) {
         int found = 0;
 
-        //check wehter fist token is root otherwise there are problems with the Children function.
         if (strcmp(token, "root") == 0)
         {
             token = strtok(NULL, "/");
             continue;
         }
-        // Search for the token in the current directory's subdirectories
+
         for (int i = 0; i < dir->number_of_children; i++) {
             if (strcmp(dir->children[i]->name, token) == 0) {
-                // Move to the subdirectory if found
                 dir = dir->children[i];
                 found = 1;
                 break;
             }
         }
+
         if (!found) {
             printf("Path was invalid\n");
             return NULL;
         }
 
-        // Get the next token
         token = strtok(NULL, "/");
     }
 
@@ -348,39 +374,32 @@ File* find_file(const char *path, Folder* root) {
     while (token != NULL) {
         int found = 0;
 
-        // Check if first token is root
         if (strcmp(token, "root") == 0) {
             token = strtok(NULL, "/");
             continue;
         }
 
-        // Search for the token in the current directory's subdirectories
         for (int i = 0; i < dir->number_of_children; i++) {
             if (strcmp(dir->children[i]->name, token) == 0) {
-                // Move to the subdirectory if found
                 dir = dir->children[i];
                 found = 1;
                 break;
             }
         }
 
-        // If no more subdirectories and no file found
         if (!found) {
             file_name = token;
             break;
         }
 
-        // Get the next token
         token = strtok(NULL, "/");
     }
 
-    // If file_name is NULL, the path was invalid or ended prematurely
     if (file_name == NULL) {
         printf("Path was invalid or did not specify a file.\n");
         return NULL;
     }
 
-    // Search for the file in the current directory
     for (int i = 0; i < dir->number_of_files; i++) {
         if (strcmp(dir->files[i].name, file_name) == 0) {
             return &dir->files[i];
@@ -393,36 +412,46 @@ File* find_file(const char *path, Folder* root) {
 
 void create_file(char name[256], char content[1024], Folder* root, char path[1000]) {
     Folder* dir = find_folder(path, root);
-    if (dir->number_of_files == MAX_FILES)
-    {
-        printf("No Files can be added to this folder");
+    if (dir == NULL || dir->number_of_files >= MAX_FILES) {
+        printf("Cannot add file to the specified directory.\n");
         return;
     }
 
-    File* file = (File *)malloc(sizeof(File));
+    File* file = &dir->files[dir->number_of_files++];
     strcpy(file->name, name);
     strcpy(file->content, content);
-
-    //TODO Current Time
     file->creation_date = time(NULL);
     file->parent_folder = dir;
-    file->size = sizeof(file->content);
+    file->size = strlen(file->content);
+
+    save_file_to_disk(file);
 
     printf("File name: %s\n", file->name);
     printf("Content: %s\n", file->content);
     printf("Size: %zu bytes\n", file->size);
     printf("Creation date: %s", ctime(&file->creation_date));
+}
 
-    for (int i = 0; i < MAX_FILES; i++) {
-        if (strcmp(dir->files[i].name, "") == 0) {
-            dir->files[i] = *file;
-            dir->number_of_files++;
-            break;
-        }
+void save_file_to_disk(File* file) {
+    char filename[512];
+    snprintf(filename, sizeof(filename), "%s.txt", file->name);
+
+    FILE* f = fopen(filename, "w");
+    if (f == NULL) {
+        printf("Error opening file for writing.\n");
+        return;
     }
 
-    printf("Number of files: %d\n", dir->number_of_files);
-    if (file->parent_folder) {
-        printf("Parent folder: %s\n", file->parent_folder->name);
+    fprintf(f, "%s", file->content);
+    fclose(f);
+}
+
+void delete_file_from_disk(char* filename) {
+    char filepath[512];
+    snprintf(filepath, sizeof(filepath), "%s.txt", filename);
+    if (remove(filepath) == 0) {
+        printf("Deleted file: %s\n", filepath);
+    } else {
+        printf("Unable to delete file: %s\n", filepath);
     }
 }
