@@ -55,6 +55,12 @@ build CMakeFiles/Memory_System_C.dir/Main.cpp.obj: CXX_COMPILER__Memory_System_C
   OBJECT_DIR = CMakeFiles\Memory_System_C.dir
   OBJECT_FILE_DIR = CMakeFiles\Memory_System_C.dir
 
+build CMakeFiles/Memory_System_C.dir/free_and_allocate.c.obj: C_COMPILER__Memory_System_C_unscanned_Debug C$:/Users/Main/CLionProjects/Memory-System-C/free$ and$ allocate.c || cmake_object_order_depends_target_Memory_System_C
+  DEP_FILE = CMakeFiles\Memory_System_C.dir\free_and_allocate.c.obj.d
+  FLAGS = -g -fdiagnostics-color=always
+  OBJECT_DIR = CMakeFiles\Memory_System_C.dir
+  OBJECT_FILE_DIR = CMakeFiles\Memory_System_C.dir
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target Memory_System_C
@@ -63,7 +69,7 @@ build CMakeFiles/Memory_System_C.dir/Main.cpp.obj: CXX_COMPILER__Memory_System_C
 #############################################
 # Link the executable Memory_System_C.exe
 
-build Memory_System_C.exe: CXX_EXECUTABLE_LINKER__Memory_System_C_Debug CMakeFiles/Memory_System_C.dir/Main.cpp.obj
+build Memory_System_C.exe: CXX_EXECUTABLE_LINKER__Memory_System_C_Debug CMakeFiles/Memory_System_C.dir/Main.cpp.obj CMakeFiles/Memory_System_C.dir/free_and_allocate.c.obj
   FLAGS = -g
   LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\Memory_System_C.dir

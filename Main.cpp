@@ -47,7 +47,7 @@ void all_directories(Folder *pFolder);
 void save_file_to_disk(File* file);
 void delete_file_from_disk(char* filename);
 
-int main()
+int mainn()
 {
     Folder* root = initilize_file_system();
     handle_command(root);

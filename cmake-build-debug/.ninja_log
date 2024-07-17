@@ -1,6 +1,24 @@
 # ninja log v6
-6	175	7425638833060130	CMakeFiles/Memory_System_C.dir/Main.cpp.obj	60d2e07f259a4f4a
-176	312	7425638834747714	Memory_System_C.exe	504725d122a4d668
-3	376	7428331524847990	build.ninja	759d58d4f6e848c2
 8	344	7428332033212187	CMakeFiles/Memory_System_C.dir/Main.cpp.obj	60d2e07f259a4f4a
 344	678	7428332036572918	Memory_System_C.exe	504725d122a4d668
+3	376	7429321238567668	build.ninja	759d58d4f6e848c2
+8	281	7429352580817982	CMakeFiles/Memory_System_C.dir/free_and_allocate.c.obj	2c54278100f39554
+7	103	7429353169554259	CMakeFiles/Memory_System_C.dir/free_and_allocate.c.obj	2c54278100f39554
+7	239	7429353471139132	CMakeFiles/Memory_System_C.dir/Main.cpp.obj	60d2e07f259a4f4a
+240	373	7429353473461153	Memory_System_C.exe	7388991cd1be573e
+8	110	7429353722759590	CMakeFiles/Memory_System_C.dir/free_and_allocate.c.obj	2c54278100f39554
+111	236	7429353723790517	Memory_System_C.exe	7388991cd1be573e
+7	110	7429354470960083	CMakeFiles/Memory_System_C.dir/free_and_allocate.c.obj	2c54278100f39554
+111	249	7429354472001030	Memory_System_C.exe	7388991cd1be573e
+8	106	7429355108469492	CMakeFiles/Memory_System_C.dir/free_and_allocate.c.obj	2c54278100f39554
+107	233	7429355109460388	Memory_System_C.exe	7388991cd1be573e
+7	105	7429355226629030	CMakeFiles/Memory_System_C.dir/free_and_allocate.c.obj	2c54278100f39554
+106	237	7429355227609984	Memory_System_C.exe	7388991cd1be573e
+7	111	7429356193001652	CMakeFiles/Memory_System_C.dir/free_and_allocate.c.obj	2c54278100f39554
+111	244	7429356194042600	Memory_System_C.exe	7388991cd1be573e
+7	108	7429356372141001	CMakeFiles/Memory_System_C.dir/free_and_allocate.c.obj	2c54278100f39554
+109	233	7429356373151916	Memory_System_C.exe	7388991cd1be573e
+7	107	7429356755799124	CMakeFiles/Memory_System_C.dir/free_and_allocate.c.obj	2c54278100f39554
+108	237	7429356756809854	Memory_System_C.exe	7388991cd1be573e
+8	107	7429359909545262	CMakeFiles/Memory_System_C.dir/free_and_allocate.c.obj	2c54278100f39554
+108	234	7429359910550140	Memory_System_C.exe	7388991cd1be573e
